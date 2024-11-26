@@ -1,7 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -23,6 +27,11 @@ func getCommands() map[string]cliCommand {
 			description: "Exit the Pokedex",
 			callback:    commandExit,
 		},
+		"map": {
+			name:        "map",
+			description: "displays the names of 20 location areas in the Pokemon world",
+			callback:    commandMap,
+		},
 	}
 }
 
@@ -40,5 +49,39 @@ exit: Exit the Pokedex
 
 func commandExit() error {
 	os.Exit(0)
+	return nil
+}
+
+type PokeLocation struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous any    `json:"previous"`
+	Results  []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"results"`
+}
+
+func commandMap() error {
+	res, err := http.Get("https://pokeapi.co/api/v2/location/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode > 299 {
+		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	var pokeLocation PokeLocation
+	err = json.Unmarshal(body, &pokeLocation)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, city := range pokeLocation.Results {
+		fmt.Println(city.Name)
+	}
 	return nil
 }

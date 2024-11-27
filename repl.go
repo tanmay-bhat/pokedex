@@ -6,6 +6,8 @@ import (
 	"slices"
 )
 
+var config Config
+
 func repl() {
 	var input string
 	// infinite for loop to keep the terminal running

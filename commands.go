@@ -1,22 +1,23 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
 	"os"
 )
 
-type cliCommand struct {
+type CliCommand struct {
 	name        string
 	description string
 	callback    func() error
 }
 
-func getCommands() map[string]cliCommand {
-	return map[string]cliCommand{
+type Config struct {
+	nextURL     string
+	previousURL string
+}
+
+func getCommands() map[string]CliCommand {
+	return map[string]CliCommand{
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
@@ -29,8 +30,13 @@ func getCommands() map[string]cliCommand {
 		},
 		"map": {
 			name:        "map",
-			description: "displays the names of 20 location areas in the Pokemon world",
-			callback:    commandMap,
+			description: "Displays the next names of 20 location areas in the Pokemon world",
+			callback:    commandMapNext(&config),
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous names of 20 location areas in the Pokemon world",
+			callback:    commandMapPrevious(&config),
 		},
 	}
 }
@@ -52,36 +58,37 @@ func commandExit() error {
 	return nil
 }
 
-type PokeLocation struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous any    `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
+func commandMapNext(config *Config) func() error {
+	return func() error {
+		PokeLocationResponse, err := ListLocations(config.nextURL)
+		if err != nil {
+			return err
+		}
+		config.nextURL = PokeLocationResponse.Next
+		config.previousURL = PokeLocationResponse.Previous
+		for _, location := range PokeLocationResponse.Results {
+			fmt.Println(location.Name)
+		}
+
+		return nil
+	}
 }
 
-func commandMap() error {
-	res, err := http.Get("https://pokeapi.co/api/v2/location/")
-	if err != nil {
-		log.Fatal(err)
+func commandMapPrevious(config *Config) func() error {
+	return func() error {
+		if config.previousURL == "" {
+			fmt.Println("Cannot go to previous page, you are at the first page")
+			return nil
+		}
+		PokeLocationResponse, err := ListLocations(config.previousURL)
+		if err != nil {
+			return err
+		}
+		config.nextURL = PokeLocationResponse.Next
+		config.previousURL = PokeLocationResponse.Previous
+		for _, location := range PokeLocationResponse.Results {
+			fmt.Println(location.Name)
+		}
+		return nil
 	}
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-	if res.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	var pokeLocation PokeLocation
-	err = json.Unmarshal(body, &pokeLocation)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, city := range pokeLocation.Results {
-		fmt.Println(city.Name)
-	}
-	return nil
 }

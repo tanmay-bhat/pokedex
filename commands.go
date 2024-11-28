@@ -41,6 +41,11 @@ func getCommands(config *Config) map[string]CliCommand {
 			description: "Displays the previous names of 20 location areas in the Pokemon world",
 			callback:    commandMapPrevious(config),
 		},
+		"explore": {
+			name:        "explore",
+			description: "Displays the list of all the Pokémon in a given area",
+			callback:    nil,
+		},
 	}
 }
 
@@ -91,6 +96,19 @@ func commandMapPrevious(config *Config) func() error {
 		config.previousURL = resp.Previous
 		for _, location := range resp.Results {
 			fmt.Println(location.Name)
+		}
+		return nil
+	}
+}
+
+func commandMapExplore(config *Config, location string) func() error {
+	return func() error {
+		resp, err := config.ExploreLocation(location)
+		if err != nil {
+			return err
+		}
+		for _, pokemon := range resp.PokemonEncounters {
+			fmt.Println(pokemon.Pokemon.Name)
 		}
 		return nil
 	}

@@ -103,10 +103,12 @@ func commandMapPrevious(config *Config) func() error {
 
 func commandMapExplore(config *Config, location string) func() error {
 	return func() error {
+		fmt.Printf("Exploring %s...\n", location)
 		resp, err := config.ExploreLocation(location)
 		if err != nil {
 			return err
 		}
+		fmt.Printf("Found Pokemon:\n")
 		for _, pokemon := range resp.PokemonEncounters {
 			fmt.Println(pokemon.Pokemon.Name)
 		}

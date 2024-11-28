@@ -31,7 +31,6 @@ func (c *Cache) Add(key string, value []byte) error {
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	fmt.Printf("Adding cache entry with key: %s\n", key)
 	c.items[key] = CacheEntry{
 		createdAt: time.Now(),
 		val:       value,

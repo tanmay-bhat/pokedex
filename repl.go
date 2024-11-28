@@ -1,29 +1,31 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"maps"
-	"slices"
+	"os"
+	"strings"
 )
 
-var config Config
+func repl(config *Config) {
+	commands := getCommands(config)
+	reader := bufio.NewReader(os.Stdin)
 
-func repl() {
-	var input string
-	// infinite for loop to keep the terminal running
 	for {
 		fmt.Print("Pokedex > ")
-		fmt.Scanln(&input)
-
-		command, exists := getCommands()[input]
-		if exists {
-			err := command.callback()
-			if err != nil {
-				fmt.Println(err)
-			}
-		} else {
-			commands := slices.Collect(maps.Keys(getCommands()))
-			fmt.Printf("Unknown command specified, available commands are: %v\n", commands)
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error reading input:", err)
+			continue
+		}
+		input = strings.TrimSpace(input)
+		command, ok := commands[input]
+		if !ok {
+			fmt.Println("Unknown command. Type 'help' for a list of commands.")
+			continue
+		}
+		if err := command.callback(); err != nil {
+			fmt.Println("Error executing command:", err)
 		}
 	}
 }

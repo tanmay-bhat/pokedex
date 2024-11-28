@@ -19,11 +19,24 @@ type PokeLocationResponse struct {
 	} `json:"results"`
 }
 
-func ListLocations(pageURL string) (PokeLocationResponse, error) {
+func (c *Config) ListLocations(pageURL string) (PokeLocationResponse, error) {
 	url := pageURL
 	if pageURL == "" {
 		url = baseURL + "/location-area"
 	}
+
+	// Check the cache for the current nextURL
+	if cachedLocations, found, err := c.cache.Get(url); found {
+		if err != nil {
+			return PokeLocationResponse{}, err
+		}
+		resp := PokeLocationResponse{}
+		if err := json.Unmarshal(cachedLocations, &resp); err != nil {
+			return PokeLocationResponse{}, err
+		}
+		return resp, nil
+	}
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return PokeLocationResponse{}, fmt.Errorf("failed to fetch data: %v", err)
@@ -44,5 +57,6 @@ func ListLocations(pageURL string) (PokeLocationResponse, error) {
 		return PokeLocationResponse{}, fmt.Errorf("failed to parse JSON: %v", err)
 	}
 
+	c.cache.Add(url, body)
 	return pokeLocation, nil
 }

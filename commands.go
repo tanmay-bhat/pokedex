@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/tanmay-bhat/pokedex/internal/cache"
 )
 
 type CliCommand struct {
@@ -14,9 +16,10 @@ type CliCommand struct {
 type Config struct {
 	nextURL     string
 	previousURL string
+	cache       *cache.Cache
 }
 
-func getCommands() map[string]CliCommand {
+func getCommands(config *Config) map[string]CliCommand {
 	return map[string]CliCommand{
 		"help": {
 			name:        "help",
@@ -31,12 +34,12 @@ func getCommands() map[string]CliCommand {
 		"map": {
 			name:        "map",
 			description: "Displays the next names of 20 location areas in the Pokemon world",
-			callback:    commandMapNext(&config),
+			callback:    commandMapNext(config),
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Displays the previous names of 20 location areas in the Pokemon world",
-			callback:    commandMapPrevious(&config),
+			callback:    commandMapPrevious(config),
 		},
 	}
 }
@@ -48,7 +51,7 @@ Usage:
 
 help: Displays a help message
 exit: Exit the Pokedex
-	`
+    `
 	fmt.Println(helpText)
 	return nil
 }
@@ -60,13 +63,13 @@ func commandExit() error {
 
 func commandMapNext(config *Config) func() error {
 	return func() error {
-		PokeLocationResponse, err := ListLocations(config.nextURL)
+		resp, err := config.ListLocations(config.nextURL)
 		if err != nil {
 			return err
 		}
-		config.nextURL = PokeLocationResponse.Next
-		config.previousURL = PokeLocationResponse.Previous
-		for _, location := range PokeLocationResponse.Results {
+		config.nextURL = resp.Next
+		config.previousURL = resp.Previous
+		for _, location := range resp.Results {
 			fmt.Println(location.Name)
 		}
 
@@ -80,13 +83,13 @@ func commandMapPrevious(config *Config) func() error {
 			fmt.Println("Cannot go to previous page, you are at the first page")
 			return nil
 		}
-		PokeLocationResponse, err := ListLocations(config.previousURL)
+		resp, err := config.ListLocations(config.previousURL)
 		if err != nil {
 			return err
 		}
-		config.nextURL = PokeLocationResponse.Next
-		config.previousURL = PokeLocationResponse.Previous
-		for _, location := range PokeLocationResponse.Results {
+		config.nextURL = resp.Next
+		config.previousURL = resp.Previous
+		for _, location := range resp.Results {
 			fmt.Println(location.Name)
 		}
 		return nil

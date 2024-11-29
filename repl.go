@@ -19,12 +19,23 @@ func repl(config *Config) {
 			continue
 		}
 		input = strings.TrimSpace(input)
-		command, ok := commands[input]
-		if !ok {
-			fmt.Println("Unknown command. Type 'help' for a list of commands.")
-			continue
-		}
-		if err := command.callback(); err != nil {
+		parts := strings.Split(input, " ")
+		command := parts[0]
+		args := parts[1:]
+
+		if cmd, found := commands[command]; !found {
+			fmt.Println("Unknown command. Type 'help' for a list of commands")
+		} else if command == "explore" {
+			if len(args) < 1 {
+				fmt.Println("Error: location argument is required")
+			}
+			location := string(args[0])
+
+			exploreCallback := commandMapExplore(config, location)
+			if err := exploreCallback(); err != nil {
+				fmt.Printf("Error running commandMapExplore: %v\n", err)
+			}
+		} else if err := cmd.callback(); err != nil {
 			fmt.Println("Error executing command:", err)
 		}
 	}

@@ -7,12 +7,14 @@ import (
 	"net/http"
 )
 
+type Pokemon struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
 type LocationAreaResponse struct {
 	PokemonEncounters []struct {
-		Pokemon struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"pokemon"`
+		Pokemon Pokemon `json:"pokemon"`
 	} `json:"pokemon_encounters"`
 }
 

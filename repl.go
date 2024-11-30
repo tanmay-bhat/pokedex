@@ -21,18 +21,32 @@ func repl(config *Config) {
 		input = strings.TrimSpace(input)
 		parts := strings.Split(input, " ")
 		command := parts[0]
-		args := parts[1:]
+		var args []string
+		if len(parts) > 1 {
+			args = parts[1:]
+		}
 
 		if cmd, found := commands[command]; !found {
 			fmt.Println("Unknown command. Type 'help' for a list of commands")
 		} else if command == "explore" {
-			if len(args) < 1 {
+			if len(args) == 0 {
 				fmt.Println("Error: location argument is required")
+				continue
 			}
 			location := string(args[0])
 
 			exploreCallback := commandMapExplore(config, location)
 			if err := exploreCallback(); err != nil {
+				fmt.Printf("Error running commandMapExplore: %v\n", err)
+			}
+		} else if command == "catch" {
+			if len(args) == 0 {
+				fmt.Println("Error: pokemon name argument is required")
+				continue
+			}
+			pokemon := string(args[0])
+			catchCallback := commandCatch(config, pokemon)
+			if err := catchCallback(); err != nil {
 				fmt.Printf("Error running commandMapExplore: %v\n", err)
 			}
 		} else if err := cmd.callback(); err != nil {

@@ -46,6 +46,11 @@ func getCommands(config *Config) map[string]CliCommand {
 			description: "Displays the list of all the Pokémon in a given area",
 			callback:    nil,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Attempts to catch the specified Pokemon",
+			callback:    nil,
+		},
 	}
 }
 
@@ -111,6 +116,26 @@ func commandMapExplore(config *Config, location string) func() error {
 		fmt.Printf("Found Pokemon:\n")
 		for _, pokemon := range resp.PokemonEncounters {
 			fmt.Println(pokemon.Pokemon.Name)
+		}
+		return nil
+	}
+}
+
+func commandCatch(config *Config, pokemon string) func() error {
+	return func() error {
+		fmt.Printf("Throwing a Pokeball at %s...\n", pokemon)
+		pokeDetails, err := config.GetPokemonDetails(pokemon)
+		if err != nil {
+			return err
+		}
+		caught, err := config.CatchPokemon(pokeDetails)
+		if err != nil {
+			return err
+		}
+		if !caught {
+			fmt.Println("pikachu escaped!")
+		} else {
+			fmt.Println("pikachu was caught!")
 		}
 		return nil
 	}

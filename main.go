@@ -6,6 +6,8 @@ import (
 	"github.com/tanmay-bhat/pokedex/internal/cache"
 )
 
+const baseURL = "https://pokeapi.co/api/v2"
+
 func main() {
 	config := &Config{
 		cache: cache.NewCache(5 * time.Minute),

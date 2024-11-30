@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-const baseURL = "https://pokeapi.co/api/v2"
-
 type PokeLocationResponse struct {
 	Count    int    `json:"count"`
 	Next     string `json:"next"`

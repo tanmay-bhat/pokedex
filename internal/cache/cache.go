@@ -48,7 +48,6 @@ func (c *Cache) Get(key string) (val []byte, hit bool, err error) {
 	if !exists {
 		return nil, false, nil
 	}
-	fmt.Println("cache hit")
 	return entry.val, true, nil
 }
 

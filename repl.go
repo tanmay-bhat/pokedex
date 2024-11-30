@@ -49,6 +49,16 @@ func repl(config *Config) {
 			if err := catchCallback(); err != nil {
 				fmt.Printf("Error running commandMapExplore: %v\n", err)
 			}
+		} else if command == "inspect" {
+			if len(args) == 0 {
+				fmt.Println("Error: pokemon name argument is required")
+				continue
+			}
+			pokemon := string(args[0])
+			catchCallback := commandInspect(config, pokemon)
+			if err := catchCallback(); err != nil {
+				fmt.Printf("Error running commandInspect: %v\n", err)
+			}
 		} else if err := cmd.callback(); err != nil {
 			fmt.Println("Error executing command:", err)
 		}

@@ -51,6 +51,11 @@ func getCommands(config *Config) map[string]CliCommand {
 			description: "Attempts to catch the specified Pokemon",
 			callback:    nil,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a caught pokemom for its abilities",
+			callback:    nil,
+		},
 	}
 }
 
@@ -136,7 +141,15 @@ func commandCatch(config *Config, pokemon string) func() error {
 			fmt.Println("pikachu escaped!")
 		} else {
 			fmt.Println("pikachu was caught!")
+			config.AddPokemonToPokedex(pokemon, pokeDetails)
 		}
+		return nil
+	}
+}
+
+func commandInspect(config *Config, pokemon string) func() error {
+	return func() error {
+		config.inspectPokemon(pokemon)
 		return nil
 	}
 }

@@ -8,9 +8,29 @@ import (
 	"net/http"
 )
 
+var (
+	pokedex = make(map[string]PokeDetails)
+)
+
 type PokeDetails struct {
 	Name           string `json:"name"`
 	BaseExperience int    `json:"base_experience"`
+	Height         int    `json:"height"`
+	Weight         int    `json:"weight"`
+	Stats          []struct {
+		BaseStat int `json:"base_stat"`
+		Effort   int `json:"effort"`
+		Stat     struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"stat"`
+	} `json:"stats"`
+	Types []struct {
+		Type struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"type"`
+	} `json:"types"`
 }
 
 func (c *Config) GetPokemonDetails(pokemon string) (PokeDetails, error) {
@@ -69,4 +89,12 @@ func (c *Config) CatchPokemon(p PokeDetails) (caught bool, err error) {
 	return caught, nil
 }
 
-func (c *Config) AddPokemonToPokedex(p Pokemon)
+func (c *Config) AddPokemonToPokedex(pokemon string, details PokeDetails) error {
+	if _, exists := pokedex[pokemon]; exists {
+		fmt.Printf("pokemon %s is already stored inside pokedex, hence skipping to add it\n", pokemon)
+		return nil
+	} else {
+		pokedex[pokemon] = details
+	}
+	return nil
+}

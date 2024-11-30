@@ -20,43 +20,39 @@ type Config struct {
 }
 
 func getCommands(config *Config) map[string]CliCommand {
-	return map[string]CliCommand{
-		"help": {
-			name:        "help",
-			description: "Displays a help message",
-			callback:    commandHelp,
-		},
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback:    commandExit,
-		},
-		"map": {
-			name:        "map",
-			description: "Displays the next names of 20 location areas in the Pokemon world",
-			callback:    commandMapNext(config),
-		},
-		"mapb": {
-			name:        "mapb",
-			description: "Displays the previous names of 20 location areas in the Pokemon world",
-			callback:    commandMapPrevious(config),
-		},
-		"explore": {
-			name:        "explore",
-			description: "Displays the list of all the Pokémon in a given area",
-			callback:    nil,
-		},
-		"catch": {
-			name:        "catch",
-			description: "Attempts to catch the specified Pokemon",
-			callback:    nil,
-		},
-		"inspect": {
-			name:        "inspect",
-			description: "Inspect a caught pokemom for its abilities",
-			callback:    nil,
-		},
-	}
+	return map[string]CliCommand{"help": {
+		name:        "help",
+		description: "Displays a help message",
+		callback:    commandHelp,
+	}, "exit": {
+		name:        "exit",
+		description: "Exit the Pokedex",
+		callback:    commandExit,
+	}, "map": {
+		name:        "map",
+		description: "Displays the next names of 20 location areas in the Pokemon world",
+		callback:    commandMapNext(config),
+	}, "mapb": {
+		name:        "mapb",
+		description: "Displays the previous names of 20 location areas in the Pokemon world",
+		callback:    commandMapPrevious(config),
+	}, "explore": {
+		name:        "explore",
+		description: "Displays the list of all the Pokémon in a given area",
+		callback:    nil,
+	}, "catch": {
+		name:        "catch",
+		description: "Attempts to catch the specified Pokemon",
+		callback:    nil,
+	}, "inspect": {
+		name:        "inspect",
+		description: "Inspect a caught pokemom for its abilities",
+		callback:    nil,
+	}, "pokedex": {
+		name:        "pokedex",
+		description: "Displays all the pokemons the player has caught",
+		callback:    commandPokedex(config),
+	}}
 }
 
 func commandHelp() error {
@@ -141,6 +137,7 @@ func commandCatch(config *Config, pokemon string) func() error {
 			fmt.Println("pikachu escaped!")
 		} else {
 			fmt.Println("pikachu was caught!")
+			fmt.Println("You may now inspect it with the inspect command.")
 			config.AddPokemonToPokedex(pokemon, pokeDetails)
 		}
 		return nil
@@ -150,6 +147,13 @@ func commandCatch(config *Config, pokemon string) func() error {
 func commandInspect(config *Config, pokemon string) func() error {
 	return func() error {
 		config.inspectPokemon(pokemon)
+		return nil
+	}
+}
+
+func commandPokedex(config *Config) func() error {
+	return func() error {
+		config.Pokedex()
 		return nil
 	}
 }
